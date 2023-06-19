@@ -1,0 +1,287 @@
+#include<iostream> 
+#include<fstream>
+#include<map>
+#include<functional>
+#include<vector>
+#include<algorithm>
+void print(std::vector < std::pair < std::string, int>> map)
+{
+	std::cout << map[0].first << " - " << map[0].second << '\n';
+}
+void task1(std::ifstream& file, std::function<bool(char, std::string)> lambda)
+{
+	std::map<std::string, int> map;
+	char letter = 'q';
+	std::string word;
+	while (file >> word)
+	{
+		if (lambda(letter, word))
+			++map[word];
+	}
+	std::vector < std::pair < std::string, int>> m(map.begin(), map.end());
+	std::sort(m.begin(), m.end(), [](auto a, auto b) {return a.second > b.second; });
+	print(m);
+}
+int main()
+{
+	std::ifstream file("file.txt");
+	auto lambda = [](char letter, std::string word)
+	{
+		bool flag = false;
+		for (int i = 0; i < word.length(); ++i)
+			if (word[i] == letter)
+				flag = true;
+		return flag;
+	};
+	task1(file, lambda);
+}
+------------------------------------------------------
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <list>
+#include <sstream>
+#include <functional>
+void print(std::map < std::string, std::set <int> > map)
+{
+	for (auto& i : map)
+	{
+		std::cout << i.first << " - ";
+		for (auto it = i.second.begin(); it != i.second.end(); ++it)
+			std::cout << *it << " ";
+		std::cout << std::endl;
+	}
+}
+void task(std::ifstream& file, std::function<bool(std::string, std::string)> lambda)                                                                                                                                                    
+{
+	std::string line;
+	int count = 1;
+	std::string word;
+	std::map < std::string, std::set <int> > map;
+	while (std::getline(file, line))
+	{
+		std::istringstream is(line);
+		std::string word;
+		while (is >> word)
+		{
+			if (lambda("qwt", word))
+				map[word].insert(count);
+		}
+		++count;
+	}
+	print(map);
+}
+int main()
+{
+	std::ifstream file("file.txt");
+	auto lambda = [](std::string letter, std::string let)
+	{
+		bool flag = false;
+		for (size_t i = 0; i < letter.size(); i++)
+		{
+			if (let[i] == letter[i])
+				flag = true;
+		}
+		return flag;
+	};
+	task(file, lambda);
+	return 0;
+}
+
+------------------------------------------------------
+
+bool HashTable_1::erase(std::string key)
+{
+    bool isFind = true;
+    size_t position = hash(key);
+    std::list<std::pair<std::string, std::string>>::iterator it =
+        std::find_if(table[position].begin(), table[position].end(), [key](std::pair<std::string, std::string> x) {return x.first == key; });
+
+    if (it == table[position].end())
+        isFind = false;
+    else table[position].erase(it);
+
+    return isFind;
+}
+
+bool HashTable2::erase(std::string key)
+{
+    bool result = false;
+    size_t position = hash(key);
+
+    while (table[position].used == 0 || table[position].info.first != key && table[position].used != -1)
+        position = (position + 1) % maxSize;
+
+    if (table[position].used == 1) {
+        result = true;
+        table[position].used = -1;
+    }
+    return result;
+}
+
+bool HashTable3::erase(std::string key)
+{
+    bool result = false;
+    size_t window = hash(key);
+
+    while (table[window].used) {
+        if (table[window].info.first == key) {
+            result = true;
+            table[window].used = false;
+        }
+
+        window = (window + 1) % maxSize;
+    }
+    return result;
+}
+
+--------------------------------------------------------------
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int maxLength;
+vector<string> maxChain;
+
+void backtrack(const string& start, const vector<string>& words, vector<string>& chain, vector<bool>& used) {
+	if (chain.size() > maxLength) {
+		maxLength = chain.size();
+		maxChain = chain;
+	}
+	for (int i = 0; i < words.size(); i++) {
+		if (!used[i] && start.back() == words[i].front()) {
+			used[i] = true;
+			chain.push_back(words[i]);
+			backtrack(words[i], words, chain, used);
+			chain.pop_back();
+			used[i] = false;
+		}
+	}
+}
+
+int main() {
+	vector<string> words = { "apple", "orange", "elephant", "umbrella", "ant", "tiger" };
+	vector<bool> used(words.size(), false);
+	vector<string> chain;
+	for (int i = 0; i < words.size(); i++) {
+		used[i] = true;
+		chain.push_back(words[i]);
+		backtrack(words[i], words, chain, used);
+		chain.pop_back();
+		used[i] = false;
+	}
+	cout << "Max chain length: " << maxLength << endl;
+	for (const auto& word : maxChain) {
+		cout << word << " ";
+	}
+	cout << endl;
+	return 0;
+}
+
+----------------------------------------------------------------------------
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void backtrack(vector < vector < int>>& coins, int i, int j, int sum, int& max_sum, int& count) 
+{
+	if (i == 9 && j == 9) { // если мы достигли правой нижней ячейки, то сохраняем сумму денежных сумм на этом пути
+		if (sum > max_sum) {
+			max_sum = sum;
+			count = 1; // если мы нашли большую сумму, то количество маршрутов, дающих эту сумму, будет равно 1
+		}
+		else if (sum == max_sum) {
+			count++; // если мы нашли еще один маршрут, дающий максимальную сумму, то увеличиваем количество маршрутов
+		}
+		return;
+	}
+
+	if (i < 9) { // движение вниз
+		backtrack(coins, i + 1, j, sum + coins[i][j], max_sum, count);
+	}
+
+	if (j < 9) { // движение вправо
+		backtrack(coins, i, j + 1, sum + coins[i][j], max_sum, count);
+	}
+}
+
+int main() {
+	vector < vector <int>> coins = {
+	{2, 9, 1, 3, 5, 0, 4, 8, 7, 7},
+	{6, 0, 7, 8, 3, 6, 9, 0, 9, 6},
+	{1, 1, 5, 0, 5, 6, 1, 2, 8, 8},
+	{9, 9, 1, 4, 3, 4, 1, 4, 3, 8},
+	{2, 0, 4, 1, 7, 7, 6, 4, 2, 3},
+	{9, 0, 9, 2, 0, 6, 3, 8, 6, 0},
+	{1, 3, 1, 4, 4, 5, 9, 2, 7, 7},
+	{9, 9, 2, 2, 1, 5, 9, 3, 0, 9},
+	{7, 4, 4, 7, 7, 3, 3, 9, 2, 6},
+	{9, 5, 5, 8, 2, 1, 3, 0, 4, 0}
+	};
+
+	int max_sum = 0;
+	int count = 0;
+
+	backtrack(coins, 0, 0, coins[0][0], max_sum, count);
+
+	cout << "Максимальная денежная сумма: " << max_sum << endl;
+	cout << "Количество маршрутов, дающих максимальную сумму: " << count << endl;
+
+	return 0;
+}
+
+--------------------------------------------------------
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+void backtrack(vector < vector <int>>& cost, int i, int j, int sum, vector<int>& sums) {
+	if (i == 9 && j == 9) 
+	{
+		// если мы достигли правой нижней ячейки, то сохраняем сумму платы за посещение ячеек на этом пути
+		sums.push_back(sum + cost[i][j]);
+		return;
+	}
+
+	if (i < 9)  // движение вниз
+		backtrack(cost, i + 1, j, sum + cost[i][j], sums);
+	
+
+	if (j < 9) // движение вправо
+		backtrack(cost, i, j + 1, sum + cost[i][j], sums);
+}
+
+int main() {
+	vector < vector < int>> cost = {
+	{10, 21, 30, 40, 50, 60, 70, 80, 90, 99},
+	{20, 30, 40, 50, 60, 70, 80, 90, 99, 10},
+	{30, 40, 50, 60, 70, 80, 90, 99, 10, 20},
+	{40, 50, 60, 70, 80, 90, 99, 10, 20, 30},
+	{50, 60, 70, 80, 90, 99, 10, 20, 30, 40},
+	{60, 70, 80, 90, 99, 10, 20, 30, 40, 50},
+	{70, 80, 90, 99, 10, 20, 30, 40, 50, 60},
+	{80, 90, 99, 10, 20, 30, 40, 50, 60, 70},
+	{90, 99, 10, 20, 30, 40, 50, 60, 70, 80},
+	{99, 10, 20, 30, 40, 50, 60, 70, 80, 90}
+	};
+
+	vector<int> sums;
+
+	backtrack(cost, 0, 0, 0, sums);
+
+	sort(sums.begin(), sums.end());
+	
+	cout << *(sums.end()-1)<< *sums.begin();
+
+	return 0;
+}
+
